@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow // Immersive Focus Environment</title>
+    <meta name="description" content="FocusFlow is a behavior-driven focus environment for students with Pomodoro immersion, subject roadmaps, adaptive task priority, and gamified progress.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Immersive Ambient Preloader -->
+    <div id="loader">
+        <div class="loader-content">
+            <div class="loader-ring-wrapper">
+                <svg viewBox="0 0 100 100" class="loader-ring">
+                    <defs>
+                        <linearGradient id="loader-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#6366F1" />
+                            <stop offset="50%" stop-color="#8B5CF6" />
+                            <stop offset="100%" stop-color="#10B981" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="loader-bg" cx="50" cy="50" r="42" />
+                    <circle class="loader-path" cx="50" cy="50" r="42" />
+                </svg>
+                <div class="loader-center-glow"></div>
+            </div>
+            <h1 class="loader-brand">FocusFlow</h1>
+            <p class="loader-tagline">Enter your state of deep flow</p>
+        </div>
+    </div>
+
+    <div class="app-layout">
+        <!-- FIXED NAVIGATION SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon-wrapper">
+                    <i data-lucide="zap" class="brand-icon"></i>
+                </div>
+                <div class="brand-text">
+                    <h2>FocusFlow</h2>
+                    <span class="brand-sub">Focus Environment</span>
+                </div>
+                <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close Navigation Menu">&times;</button>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i data-lucide="compass"></i>
+                    <span>Now Deck</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="planner">
+                    <i data-lucide="map"></i>
+                    <span>Study Planner</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="tasks">
+                    <i data-lucide="layers"></i>
+                    <span>Agenda</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="progress">
+                    <i data-lucide="activity"></i>
+                    <span>Focus Engine</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="settings">
+                    <i data-lucide="sliders"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="quick-timer-widget" id="sidebarQuickWidget">
+                    <div class="widget-header">
+                        <span class="widget-title">Active Focus Block</span>
+                        <span class="widget-dot"></span>
+                    </div>
+                    <div class="widget-timer-display" id="sidebarTimerDisplay">25:00</div>
+                </div>
+            </div>
+        </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- MAIN WORKSPACE CONTAINER -->
+        <main class="workspace" id="mainWorkspace">
+            <!-- STICKY TOP BAR -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="mobile-toggle-btn" id="mobileMenuToggle" aria-label="Toggle Navigation Menu">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="page-title-group">
+                        <h2 id="pageTitle">Now Deck</h2>
+                        <span class="page-badge" id="activeStateBadge">Ready for Action</span>
+                    </div>
+                </div>
+                <div class="top-bar-right">
+                    <button class="keyboard-shortcut-hint" id="shortcutHintBtn" title="Keyboard Shortcuts (Ctrl+/)">
+                        <kbd>Ctrl</kbd> + <kbd>/</kbd>
+                    </button>
+                    <div class="profile-widget" onclick="switchView('settings')" title="View Settings">
+                        <div class="avatar" id="userAvatar">S</div>
+                        <div class="profile-info">
+                            <span id="profileName">Student</span>
+                            <span class="profile-rank-chip" id="topProfileRank">Level 1</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TOAST NOTIFICATION CONTAINER -->
+            <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+            <!-- VIEW PANELS -->
+            <!-- 1. DASHBOARD / NOW DECK VIEW -->
+            <section id="dashboardView" class="view-panel active">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title" id="dashboardGreeting">Welcome back!</h1>
+                        <p class="view-subtitle">What needs your immediate attention right now?</p>
+                    </div>
+                    <button class="btn btn-primary btn-glow" id="quickAddTaskBtn">
+                        <i data-lucide="plus"></i> New Objective
+                    </button>
+                </div>
+
+                <!-- SPOTLIGHT HERO CARD: WHAT NEEDS ATTENTION RIGHT NOW -->
+                <div class="spotlight-attention-card" id="spotlightAttentionCard">
+                    <div class="spotlight-content">
+                        <div class="spotlight-tag">
+                            <span class="pulse-beacon"></span>
+                            <span>Immediate Priority Focus</span>
+                        </div>
+                        <h3 class="spotlight-title" id="spotlightTaskTitle">No pending urgent tasks</h3>
+                        <p class="spotlight-desc" id="spotlightTaskMeta">Add a study task or launch a Pomodoro session to kickstart your momentum.</p>
+                        <div class="spotlight-actions">
+                            <button class="btn btn-emerald btn-lg" id="spotlightStartBtn">
+                                <i data-lucide="play"></i> Start Focus Mode Now
+                            </button>
+                            <button class="btn btn-secondary" id="spotlightViewTasksBtn">
+                                <i data-lucide="list"></i> View All Tasks
+                            </button>
+                        </div>
+                    </div>
+                    <div class="spotlight-timer-visual">
+                        <div class="mini-focus-ring">
+                            <span class="mini-ring-val" id="spotlightTimerVal">25:00</span>
+                            <span class="mini-ring-label">Focus Ready</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- METRICS METERS GRID -->
+                <div class="metrics-grid">
+                    <div class="metric-card" id="metricPendingCard">
+                        <div class="metric-icon bg-indigo"><i data-lucide="target"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-value" id="dashPendingCount">0</span>
+                            <span class="metric-label">Pending Objectives</span>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="metricCompletedCard">
+                        <div class="metric-icon bg-emerald"><i data-lucide="check-circle-2"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-value" id="dashCompletedCount">0</span>
+                            <span class="metric-label">Completed Tasks</span>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="metricTimeCard">
+                        <div class="metric-icon bg-amber"><i data-lucide="clock"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-value" id="dashStudyTime">0h 0m</span>
+                            <span class="metric-label">Focus Time Today</span>
+                        </div>
+                    </div>
+                    <div class="metric-card" id="metricOverdueCard">
+                        <div class="metric-icon bg-rose"><i data-lucide="alert-circle"></i></div>
+                        <div class="metric-details">
+                            <span class="metric-value" id="dashOverdueCount">0</span>
+                            <span class="metric-label">Overdue Deadlines</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DASHBOARD TWO-COLUMN LAYOUT -->
+                <div class="dashboard-layout">
+                    <!-- Today's Schedule -->
+                    <div class="dashboard-card main-card">
+                        <div id="dashSyllabusTracker" class="dash-syllabus-block" style="display: none;">
+                            <div class="card-header">
+                                <h3 class="card-title"><i data-lucide="map-pin"></i> Subject Mastery Progress</h3>
+                            </div>
+                            <div class="planner-progress-section" style="margin-top: 12px;">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                        <div class="card-header">
+                            <h3 class="card-title"><i data-lucide="calendar"></i> Due Today</h3>
+                            <a href="#" class="card-action-link" id="viewAllTasksLink">View Agenda &rarr;</a>
+                        </div>
+                        <div class="today-tasks-container" id="dashTodayTasks"></div>
+                    </div>
+
+                    <!-- Quick Session Launcher -->
+                    <div class="dashboard-card side-card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i data-lucide="zap"></i> Fast Focus Block</h3>
+                        </div>
+                        <div class="quick-timer-body">
+                            <div class="quick-readout" id="dashTimerDisplay">25:00</div>
+                            <p class="quick-phase" id="dashTimerPhase">Focus Phase</p>
+                            <div class="quick-timer-actions">
+                                <button id="dashStartPauseBtn" class="btn btn-success"><i data-lucide="play"></i> Start Session</button>
+                                <button id="dashGoToTimerBtn" class="btn btn-secondary">Open Engine</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. STUDY PLANNER VIEW -->
+            <section id="plannerView" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Study Planner</h1>
+                        <p class="view-subtitle">Deconstruct syllabus subjects into structured exam roadmaps.</p>
+                    </div>
+                </div>
+                <div class="planner-layout">
+                    <div class="settings-card planner-input-card">
+                        <h3 class="settings-card-title"><i data-lucide="plus-circle"></i> Create Subject Roadmap</h3>
+                        <form id="studyPlanForm">
+                            <div class="input-block">
+                                <label for="subjectName">Subject / Course Title</label>
+                                <input type="text" id="subjectName" placeholder="e.g., Organic Chemistry II" required>
+                            </div>
+                            <div class="input-block">
+                                <label for="examDate">Target Exam Date</label>
+                                <input type="date" id="examDate" required>
+                            </div>
+                            <div class="input-block">
+                                <label for="syllabusChapters">Total Chapters / Modules</label>
+                                <input type="number" id="syllabusChapters" min="1" max="100" placeholder="e.g., 12" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                <i data-lucide="wand-2"></i> Generate Roadmap
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="subjects-grid-container" id="subjectsGrid">
+                        <!-- Subject cards dynamically injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. TASKS VIEW (OPERATIONAL AGENDA) -->
+            <section id="tasksView" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Operational Agenda</h1>
+                        <p class="view-subtitle">Organize, schedule, and execute your study targets.</p>
+                    </div>
+                    <button class="btn btn-primary" id="openTaskModalBtn">
+                        <i data-lucide="plus"></i> Add Study Task
+                    </button>
+                </div>
+
+                <div class="tasks-controls-deck">
+                    <div class="view-toggle-group">
+                        <button class="btn btn-secondary btn-sm active" id="btnGridView" type="button" title="Grid View">
+                            <i data-lucide="layout-grid"></i> Grid
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="btnCalendarView" type="button" title="Calendar View">
+                            <i data-lucide="calendar"></i> Calendar
+                        </button>
+                    </div>
+                    <div class="search-input-wrapper">
+                        <i class="search-icon" data-lucide="search"></i>
+                        <input type="text" id="taskSearch" placeholder="Search tasks by title or subject...">
+                    </div>
+                    <div class="filters-group">
+                        <div class="filter-dropdown-wrapper">
+                            <label class="filter-select-label" for="statusFilter">Status</label>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="all">All Tasks</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="filter-dropdown-wrapper">
+                            <label class="filter-select-label" for="priorityFilter">Priority</label>
+                            <select id="priorityFilter" class="filter-select">
+                                <option value="all">All Priorities</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="filter-dropdown-wrapper">
+                            <label class="filter-select-label" for="subjectFilter">Subject</label>
+                            <select id="subjectFilter" class="filter-select">
+                                <option value="all">All Subjects</option>
+                            </select>
+                        </div>
+                        <div class="filter-dropdown-wrapper">
+                            <label class="filter-select-label" for="sortOrder">Sort By</label>
+                            <select id="sortOrder" class="filter-select">
+                                <option value="default">Default</option>
+                                <option value="due_asc">Due Date ↑</option>
+                                <option value="due_desc">Due Date ↓</option>
+                                <option value="priority">Priority</option>
+                                <option value="duration">Duration</option>
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tasksGrid" class="task-grid-stream"></div>
+                <div id="tasksCalendar" class="tasks-calendar-view" style="display: none;"></div>
+                <div id="tasksEmptyState" class="empty-state-card" style="display: none;">
+                    <div class="empty-graphic">
+                        <i data-lucide="inbox"></i>
+                    </div>
+                    <h4>No Tasks Found</h4>
+                    <p>Create a new task block or adjust your current filter criteria.</p>
+                </div>
+            </section>
+
+            <!-- 4. PROGRESS VIEW (SIGNATURE POMODORO TIMER + STATS) -->
+            <section id="progressView" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Progress Engine</h1>
+                        <p class="view-subtitle">Immerse in deep focus sessions and track your mastery milestones.</p>
+                    </div>
+                </div>
+
+                <div class="progress-grid">
+                    <!-- SIGNATURE LIVING POMODORO ENGINE -->
+                    <div class="progress-card focus-engine-card" id="focusEngineCard">
+                        <div class="pomodoro-cycle-display" id="pomodoroCycleDisplay">
+                            <span id="pomodoroSessionText">Session 1 of 4</span>
+                        </div>
+
+                        <!-- LIVING CIRCULAR TIMER -->
+                        <div class="circular-timer-container" id="timerContainer">
+                            <div class="timer-breath-halo"></div>
+                            <svg class="timer-svg" viewBox="0 0 200 200">
+                                <defs>
+                                    <linearGradient id="timer-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#6366F1" />
+                                        <stop offset="50%" stop-color="#8B5CF6" />
+                                        <stop offset="100%" stop-color="#10B981" />
+                                    </linearGradient>
+                                </defs>
+                                <circle class="timer-circle-bg" cx="100" cy="100" r="90"></circle>
+                                <circle class="timer-circle-progress" id="timerProgressCircle" cx="100" cy="100" r="90"></circle>
+                            </svg>
+                            <div class="timer-inner-content">
+                                <span class="timer-time-readout" id="mainTimerDisplay">25:00</span>
+                                <p class="timer-phase-label" id="mainTimerPhase">Focus Block</p>
+                            </div>
+                        </div>
+
+                        <!-- PRESETS & TOGGLES -->
+                        <div class="timer-presets">
+                            <button class="preset-btn active" data-duration="25" data-phase="Focus">25m Focus</button>
+                            <button class="preset-btn" data-duration="5" data-phase="Short Break">5m Break</button>
+                            <button class="preset-btn" data-duration="15" data-phase="Long Break">15m Break</button>
+                        </div>
+
+                        <div class="timer-auto-start-toggle">
+                            <label class="auto-start-label" for="autoStartToggle">
+                                <span class="auto-start-text">Auto-start next phase</span>
+                                <span class="switch-toggle switch-toggle-sm">
+                                    <input type="checkbox" id="autoStartToggle">
+                                    <span class="slider-round"></span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="timer-workspace-controls">
+                            <button id="mainStartPauseBtn" class="btn btn-success btn-lg btn-glow"><i data-lucide="play"></i> Start Session</button>
+                            <button id="mainResetTimerBtn" class="btn btn-secondary btn-lg"><i data-lucide="rotate-ccw"></i> Reset</button>
+                        </div>
+
+                        <button id="enterFocusModeBtn" class="btn btn-focus-mode">
+                            <i data-lucide="maximize-2"></i> Enter Full Focus Mode
+                        </button>
+                    </div>
+
+                    <!-- PERFORMANCE & GAMIFICATION STATS -->
+                    <div class="progress-card stats-badges-card">
+                        <h3 class="card-title" style="margin-bottom: 20px;"><i data-lucide="award"></i> Level & Achievements</h3>
+                        
+                        <!-- TACTILE XP & STREAK METERS -->
+                        <div class="rewards-stats" id="rewardsDashboardPanel">
+                            <div class="reward-stat-item">
+                                <div class="reward-stat-icon bg-yellow"><i data-lucide="sparkles"></i></div>
+                                <div class="reward-stat-details">
+                                    <span class="reward-stat-value" id="rewardPointsDisplay">0</span>
+                                    <span class="reward-stat-label">Total Study XP</span>
+                                </div>
+                            </div>
+                            <div class="reward-stat-item">
+                                <div class="reward-stat-icon bg-orange"><i data-lucide="flame"></i></div>
+                                <div class="reward-stat-details">
+                                    <span class="reward-stat-value" id="rewardStreakDisplay">0 days</span>
+                                    <span class="reward-stat-label">Daily Study Streak</span>
+                                </div>
+                            </div>
+                            <div class="reward-stat-item">
+                                <div class="reward-stat-icon bg-indigo"><i data-lucide="shield-check"></i></div>
+                                <div class="reward-stat-details">
+                                    <span class="reward-stat-value" id="rewardLevelDisplay">Level 1</span>
+                                    <span class="reward-stat-label" id="rewardRankDisplay">Beginner Rank</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UNLOCKED BADGES GRID -->
+                        <div class="rewards-achievements">
+                            <h4 class="achievements-title"><i data-lucide="trophy"></i> Mastery Badges</h4>
+                            <div class="achievements-grid" id="achievementsGrid">
+                                <div class="badge-item locked" id="badge-first_task" title="Complete your first study task">
+                                    <span class="badge-icon"><i data-lucide="check-circle-2"></i></span>
+                                    <span class="badge-name">First Step</span>
+                                </div>
+                                <div class="badge-item locked" id="badge-five_tasks" title="Complete 5 study tasks">
+                                    <span class="badge-icon"><i data-lucide="layers"></i></span>
+                                    <span class="badge-name">Overachiever</span>
+                                </div>
+                                <div class="badge-item locked" id="badge-timer_champ" title="Complete your first Pomodoro focus session">
+                                    <span class="badge-icon"><i data-lucide="timer"></i></span>
+                                    <span class="badge-name">Focus Master</span>
+                                </div>
+                                <div class="badge-item locked" id="badge-streak_3" title="Reach a 3-day study streak">
+                                    <span class="badge-icon"><i data-lucide="flame"></i></span>
+                                    <span class="badge-name">Streak Flame</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. CONFIGURATION DECK (SETTINGS) -->
+            <section id="settingsView" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h1 class="view-title">Configuration Deck</h1>
+                        <p class="view-subtitle">Customize environment parameters and manage offline backups.</p>
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3 class="settings-card-title"><i data-lucide="user"></i> Identity Profile</h3>
+                        <div class="settings-row">
+                            <div class="setting-detail">
+                                <span class="setting-name">Display Name</span>
+                                <span class="setting-desc">Personalize your greeting and workspace avatar.</span>
+                            </div>
+                            <input type="text" id="settingDisplayName" class="setting-text-input" placeholder="Enter your name..." maxlength="40">
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3 class="settings-card-title"><i data-lucide="sun-moon"></i> Visual Atmosphere</h3>
+                        <div class="settings-row">
+                            <div class="setting-detail">
+                                <span class="setting-name">Theme Mode</span>
+                                <span class="setting-desc">Toggle between Deep Dark (Immersion) and Crisp Light (Clarity).</span>
+                            </div>
+                            <div class="switch-control">
+                                <label class="switch-toggle" for="themeToggleSwitch">
+                                    <input type="checkbox" id="themeToggleSwitch">
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3 class="settings-card-title"><i data-lucide="sparkles"></i> Gamification Mechanics</h3>
+                        <div class="settings-row">
+                            <div class="setting-detail">
+                                <span class="setting-name">Enable Reward Engine</span>
+                                <span class="setting-desc">Track study XP counters, streak meters, and badges.</span>
+                            </div>
+                            <div class="switch-control">
+                                <label class="switch-toggle" for="rewardSystemToggleSwitch">
+                                    <input type="checkbox" id="rewardSystemToggleSwitch" checked>
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3 class="settings-card-title"><i data-lucide="clock"></i> Timer Interval Configuration</h3>
+                        <div class="settings-row-stack">
+                            <div class="setting-row-input">
+                                <label for="settingFocusDuration">Focus Interval (Minutes)</label>
+                                <input type="number" id="settingFocusDuration" min="1" max="180" value="25">
+                            </div>
+                            <div class="setting-row-input">
+                                <label for="settingBreakDuration">Short Break (Minutes)</label>
+                                <input type="number" id="settingBreakDuration" min="1" max="60" value="5">
+                            </div>
+                            <div class="setting-row-input">
+                                <label for="settingLongBreakDuration">Long Break (Minutes)</label>
+                                <input type="number" id="settingLongBreakDuration" min="1" max="60" value="15">
+                            </div>
+                        </div>
+                        <div class="settings-row" style="margin-top: 16px;">
+                            <div class="setting-detail">
+                                <span class="setting-name">Auto-start next phase</span>
+                                <span class="setting-desc">Begin break/focus blocks automatically when time expires.</span>
+                            </div>
+                            <div class="switch-control">
+                                <label class="switch-toggle" for="settingAutoStartToggle">
+                                    <input type="checkbox" id="settingAutoStartToggle">
+                                    <span class="slider-round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3 class="settings-card-title"><i data-lucide="bell"></i> Desktop Notifications</h3>
+                        <div class="settings-row">
+                            <div class="setting-detail">
+                                <span class="setting-name">System Alerts</span>
+                                <span class="setting-desc">Receive browser banner alerts when focus blocks end.</span>
+                            </div>
+                            <button id="grantPermissionBtn" class="btn btn-secondary btn-sm">Grant Permission</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3 class="settings-card-title"><i data-lucide="database"></i> Workspace Backup</h3>
+                        <div class="settings-row">
+                            <div class="setting-detail">
+                                <span class="setting-name">Export & Import JSON</span>
+                                <span class="setting-desc">Safely back up or restore your data stores.</span>
+                            </div>
+                            <div class="data-management-actions">
+                                <button id="exportDataBtn" class="btn btn-secondary btn-sm"><i data-lucide="download"></i> Export Backup</button>
+                                <button id="importDataBtn" class="btn btn-secondary btn-sm"><i data-lucide="upload"></i> Restore Data</button>
+                                <input type="file" id="importFileInput" accept=".json" style="display:none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-card" style="border-color: rgba(239, 68, 68, 0.4);">
+                        <h3 class="settings-card-title" style="color: var(--error);"><i data-lucide="trash-2"></i> Workspace Reset</h3>
+                        <div class="settings-row">
+                            <div class="setting-detail">
+                                <span class="setting-name">Clear Data Stores</span>
+                                <span class="setting-desc">Wipes all stored tasks and roadmap plans. Irreversible.</span>
+                            </div>
+                            <button id="clearAllTasksBtn" class="btn btn-danger btn-sm"><i data-lucide="alert-triangle"></i> Clear Workspace Data</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL DIALOG OVERLAYS -->
+    <!-- TASK FORM MODAL -->
+    <div id="taskModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i data-lucide="plus-circle"></i> Initialize Objective Block</h3>
+                <button class="modal-close-btn" id="closeModalBtn" aria-label="Close Dialog"><i data-lucide="x"></i></button>
+            </div>
+            <form id="taskForm" autocomplete="off">
+                <input type="hidden" id="editTaskId">
+                <div class="input-block">
+                    <label for="taskTitle">Task Title</label>
+                    <input type="text" id="taskTitle" placeholder="e.g., Quantum Mechanics Problem Set #4" required>
+                </div>
+                <div class="input-grid">
+                    <div class="input-block">
+                        <label for="taskCategory">Subject / Category</label>
+                        <input type="text" id="taskCategory" placeholder="e.g., Physics" required>
+                    </div>
+                    <div class="input-block">
+                        <label for="taskDate">Due Date & Time</label>
+                        <input type="datetime-local" id="taskDate" required>
+                    </div>
+                </div>
+                <div class="input-grid">
+                    <div class="input-block">
+                        <label for="taskPriority">Task Priority</label>
+                        <select id="taskPriority" class="form-select" required>
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
+                    <div class="input-block">
+                        <label for="taskDuration">Estimated Time (Minutes)</label>
+                        <div class="numeric-input-wrapper">
+                            <input type="number" id="taskDuration" min="1" max="999" placeholder="60" required>
+                            <span class="input-suffix">mins</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-block">
+                    <label for="taskNotes">Notes & Resources</label>
+                    <textarea id="taskNotes" class="form-textarea" placeholder="Add study notes, links, formula references..." rows="3"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="cancelModalBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" id="formSubmitBtn" class="btn btn-primary">
+                        <i data-lucide="plus"></i> Save Objective
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DISTRACTION-FREE FULL FOCUS OVERLAY -->
+    <div id="focusModeOverlay" class="focus-mode-overlay">
+        <div class="focus-mode-container">
+            <div class="focus-mode-header">
+                <span class="focus-mode-badge"><i data-lucide="shield"></i> Distraction-Free Sanctuary</span>
+                <button id="exitFocusModeBtn" class="btn btn-secondary btn-sm"><i data-lucide="arrow-left"></i> Exit Sanctuary</button>
+            </div>
+            <div class="focus-mode-body">
+                <div class="focus-active-task-container">
+                    <span class="focus-task-lbl">Active Objective</span>
+                    <h2 id="focusActiveTaskTitle" class="focus-active-task-title">Deep Focus Block</h2>
+                </div>
+                <div class="focus-circular-timer">
+                    <div class="focus-ring-halo"></div>
+                    <svg class="focus-timer-svg" viewBox="0 0 220 220">
+                        <circle class="focus-circle-bg" cx="110" cy="110" r="100"></circle>
+                        <circle class="focus-circle-progress" id="focusProgressCircle" cx="110" cy="110" r="100"></circle>
+                    </svg>
+                    <div class="focus-inner-content">
+                        <span class="focus-time-display" id="focusTimerDisplay">25:00</span>
+                        <p class="focus-phase-label" id="focusTimerPhase">Focus Phase</p>
+                    </div>
+                </div>
+                <div class="focus-timer-controls">
+                    <button id="focusStartPauseBtn" class="btn btn-success btn-lg btn-glow"><i data-lucide="play"></i> Start Focus</button>
+                    <button id="focusResetTimerBtn" class="btn btn-secondary btn-lg"><i data-lucide="rotate-ccw"></i> Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WELCOME ONBOARDING MODAL -->
+    <div id="welcomeModal" class="modal-overlay">
+        <div class="modal-card onboarding-card">
+            <div class="onboarding-header">
+                <div class="brand-icon-wrapper large">
+                    <i data-lucide="zap" class="brand-icon"></i>
+                </div>
+                <h2>Welcome to FocusFlow</h2>
+                <p>Your distraction-free focus environment. Enter your name to personalize your workspace.</p>
+            </div>
+            <form id="welcomeForm" autocomplete="off">
+                <div class="input-block">
+                    <label for="welcomeNameInput">Your Name</label>
+                    <input type="text" id="welcomeNameInput" placeholder="e.g., Alex" maxlength="40" required autofocus>
+                </div>
+                <button type="submit" class="btn btn-primary btn-glow" style="width: 100%; margin-top: 8px;">
+                    <i data-lucide="arrow-right"></i> Begin Session
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audio Element -->
+    <audio id="audioNotification" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
+
+    <!-- External Script Assets -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.394.0/dist/umd/lucide.min.js"></script>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
