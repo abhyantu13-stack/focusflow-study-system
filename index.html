@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusFlow // Focus Environment</title>
-    <meta name="description" content="FocusFlow is a focused study planner with Pomodoro timer, task management, and subject roadmaps.">
+    <title>FocusFlow // Focus Better. Study Smarter.</title>
+    <meta name="description" content="FocusFlow is a premium study planner and focus system built for deep work, habit tracking, and goal achievement.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <!-- Preloader -->
+    <!-- PRELOADER -->
     <div id="loader">
         <div class="loader-content">
             <div class="loader-ring-wrapper">
@@ -21,7 +21,7 @@
                 </svg>
             </div>
             <h1 class="loader-brand">FocusFlow</h1>
-            <p class="loader-tagline">Loading your focus environment...</p>
+            <p class="loader-tagline">Focus Better. Study Smarter.</p>
         </div>
     </div>
 
@@ -74,7 +74,7 @@
 
         <!-- MAIN WORKSPACE -->
         <main class="workspace" id="mainWorkspace">
-            <!-- TOP BAR -->
+            <!-- TOP HEADER BAR -->
             <header class="top-bar">
                 <div class="top-bar-left">
                     <button class="menu-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar Navigation" title="Toggle Sidebar">
@@ -83,7 +83,7 @@
                     <h2 id="pageTitle" class="top-page-title">Dashboard</h2>
                 </div>
                 <div class="top-bar-right">
-                    <div class="profile-widget" onclick="switchView('settings')" title="View Profile Settings">
+                    <div class="profile-widget" onclick="switchView('settings')" title="View Settings">
                         <div class="avatar" id="userAvatar">S</div>
                         <div class="profile-info">
                             <span id="profileName">Student</span>
@@ -93,46 +93,61 @@
                 </div>
             </header>
 
-            <!-- TOAST CONTAINERS -->
+            <!-- TOAST NOTIFICATIONS -->
             <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
             <!-- VIEW PANELS -->
             <!-- 1. DASHBOARD VIEW -->
             <section id="dashboardView" class="view-panel active">
-                <div class="view-header">
-                    <div>
-                        <h1 class="view-title" id="dashboardGreeting">Welcome back!</h1>
-                        <p class="view-subtitle">What needs your attention right now?</p>
+                <!-- HERO LANDING SECTION -->
+                <div class="hero-banner">
+                    <div class="hero-banner-content">
+                        <span class="hero-badge">🚀 Productivity System</span>
+                        <h1 class="hero-headline">Focus Better. Study Smarter.</h1>
+                        <p class="hero-subtext">Eliminate distractions, execute your study plan, and build unstoppable daily momentum.</p>
+                        <div class="hero-cta-group">
+                            <button class="btn btn-primary btn-lg" id="heroStartFocusBtn">
+                                <i data-lucide="play"></i> Start Focus Mode
+                            </button>
+                            <button class="btn btn-secondary btn-lg" id="heroAddTaskBtn">
+                                <i data-lucide="plus"></i> Add New Task
+                            </button>
+                        </div>
                     </div>
-                    <button class="btn btn-primary" id="quickAddTaskBtn">
-                        <i data-lucide="plus"></i> New Task
-                    </button>
                 </div>
 
-                <!-- SPOTLIGHT HERO ACTION CARD -->
-                <div class="spotlight-attention-card" id="spotlightAttentionCard">
-                    <div class="spotlight-content">
-                        <span class="spotlight-tag">Immediate Focus Target</span>
-                        <h3 class="spotlight-title" id="spotlightTaskTitle">No pending urgent tasks</h3>
-                        <p class="spotlight-desc" id="spotlightTaskMeta">Add a task or launch a Pomodoro session to kickstart your study block.</p>
-                        <div class="spotlight-actions">
+                <!-- 🔥 FOCUS NOW PANEL (CENTER OF UI HERO FEATURE) -->
+                <div class="focus-now-panel" id="focusNowPanel">
+                    <div class="focus-panel-header">
+                        <span class="focus-panel-badge"><span class="pulse-dot"></span> 🔥 Focus Now</span>
+                        <span class="focus-panel-phase-pill" id="focusPanelPhasePill">Focus Phase</span>
+                    </div>
+                    <div class="focus-panel-body">
+                        <div class="focus-current-task-block">
+                            <span class="focus-task-label">CURRENT OBJECTIVE</span>
+                            <h3 class="focus-current-task-title" id="spotlightTaskTitle">No pending urgent tasks</h3>
+                            <p class="focus-current-task-meta" id="spotlightTaskMeta">Add a study task block or launch a Pomodoro session to kickstart your momentum.</p>
+                        </div>
+                        <div class="focus-timer-ring-hero">
+                            <div class="focus-ring-glow"></div>
+                            <svg class="focus-svg-hero" viewBox="0 0 160 160">
+                                <circle class="focus-ring-bg" cx="80" cy="80" r="70" />
+                                <circle class="focus-ring-progress" id="focusPanelProgressRing" cx="80" cy="80" r="70" />
+                            </svg>
+                            <div class="focus-timer-text-readout" id="spotlightTimerVal">25:00</div>
+                        </div>
+                        <div class="focus-panel-actions">
                             <button class="btn btn-primary btn-lg" id="spotlightStartBtn">
-                                <i data-lucide="play"></i> Start Focus Mode Now
+                                <i data-lucide="play"></i> Start Focus
                             </button>
-                            <button class="btn btn-secondary" id="spotlightViewTasksBtn">
+                            <button class="btn btn-secondary btn-lg" id="spotlightViewTasksBtn">
                                 <i data-lucide="list"></i> View All Tasks
                             </button>
                         </div>
                     </div>
-                    <div class="spotlight-timer-visual">
-                        <div class="mini-focus-ring">
-                            <span class="mini-ring-val" id="spotlightTimerVal">25:00</span>
-                            <span class="mini-ring-label">Focus Block</span>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- METRICS GRID -->
+                <!-- DASHBOARD METRICS STATS -->
                 <div class="metrics-grid">
                     <div class="metric-card metric-pending" id="metricPendingCard">
                         <div class="metric-icon"><i data-lucide="target"></i></div>
@@ -164,31 +179,41 @@
                     </div>
                 </div>
 
-                <!-- DASHBOARD TWO-COLUMN LAYOUT -->
+                <!-- DASHBOARD TWO-COLUMN LAYOUT WITH WEEKLY PROGRESS CHART -->
                 <div class="dashboard-layout">
-                    <!-- Schedule Card -->
+                    <!-- Due Today & Syllabus Progress -->
                     <div class="dashboard-card main-card">
                         <div id="dashSyllabusTracker" class="dash-syllabus-block" style="display: none;">
                             <div class="card-header">
-                                <h3 class="card-title"><i data-lucide="map-pin"></i> Subject Mastery Progress</h3>
+                                <h3 class="card-title"><i data-lucide="map-pin"></i> Subject Mastery Roadmaps</h3>
                             </div>
-                            <div class="planner-progress-section" style="margin-top: 12px;">
-                                <!-- Injected dynamically -->
-                            </div>
+                            <div class="planner-progress-section" style="margin-top: 12px;"></div>
                         </div>
                         <div class="card-header">
                             <h3 class="card-title"><i data-lucide="calendar"></i> Due Today</h3>
-                            <a href="#" class="card-action-link" id="viewAllTasksLink">View Tasks &rarr;</a>
+                            <a href="#" class="card-action-link" id="viewAllTasksLink">View All Tasks &rarr;</a>
                         </div>
                         <div class="today-tasks-container" id="dashTodayTasks"></div>
                     </div>
 
-                    <!-- Quick Session Card -->
+                    <!-- WEEKLY PROGRESS CHART & GAMIFICATION SUMMARY -->
                     <div class="dashboard-card side-card">
                         <div class="card-header">
-                            <h3 class="card-title"><i data-lucide="zap"></i> Quick Focus Start</h3>
+                            <h3 class="card-title"><i data-lucide="bar-chart-2"></i> Weekly Focus Hours</h3>
                         </div>
-                        <div class="quick-timer-body">
+                        <div class="weekly-chart-container" id="weeklyChartContainer">
+                            <div class="chart-bars-wrapper">
+                                <div class="chart-bar-col"><div class="chart-bar" style="height: 35%;" data-val="1.5h"></div><span class="chart-day">Mon</span></div>
+                                <div class="chart-bar-col"><div class="chart-bar" style="height: 60%;" data-val="2.8h"></div><span class="chart-day">Tue</span></div>
+                                <div class="chart-bar-col"><div class="chart-bar" style="height: 80%;" data-val="4.0h"></div><span class="chart-day">Wed</span></div>
+                                <div class="chart-bar-col"><div class="chart-bar" style="height: 50%;" data-val="2.2h"></div><span class="chart-day">Thu</span></div>
+                                <div class="chart-bar-col"><div class="chart-bar" style="height: 95%;" data-val="5.1h"></div><span class="chart-day">Fri</span></div>
+                                <div class="chart-bar-col"><div class="chart-bar" style="height: 70%;" data-val="3.5h"></div><span class="chart-day">Sat</span></div>
+                                <div class="chart-bar-col"><div class="chart-bar active-day" style="height: 45%;" data-val="2.0h"></div><span class="chart-day">Sun</span></div>
+                            </div>
+                        </div>
+
+                        <div class="quick-timer-body" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px;">
                             <div class="quick-readout" id="dashTimerDisplay">25:00</div>
                             <p class="quick-phase" id="dashTimerPhase">Focus Phase</p>
                             <div class="quick-timer-actions">
@@ -230,9 +255,7 @@
                         </form>
                     </div>
                     
-                    <div class="subjects-grid-container" id="subjectsGrid">
-                        <!-- Injected dynamically -->
-                    </div>
+                    <div class="subjects-grid-container" id="subjectsGrid"></div>
                 </div>
             </section>
 
@@ -274,9 +297,9 @@
                             <label class="filter-select-label" for="priorityFilter">Priority</label>
                             <select id="priorityFilter" class="filter-select">
                                 <option value="all">All Priorities</option>
-                                <option value="high">High</option>
-                                <option value="medium">Medium</option>
-                                <option value="low">Low</option>
+                                <option value="high">High Priority</option>
+                                <option value="medium">Medium Priority</option>
+                                <option value="low">Low Priority</option>
                             </select>
                         </div>
                         <div class="filter-dropdown-wrapper">
@@ -288,13 +311,12 @@
                         <div class="filter-dropdown-wrapper">
                             <label class="filter-select-label" for="sortOrder">Sort By</label>
                             <select id="sortOrder" class="filter-select">
-                                <option value="default">Default</option>
+                                <option value="default">Urgent First</option>
                                 <option value="due_asc">Due Date ↑</option>
                                 <option value="due_desc">Due Date ↓</option>
                                 <option value="priority">Priority</option>
                                 <option value="duration">Duration</option>
                                 <option value="newest">Newest First</option>
-                                <option value="oldest">Oldest First</option>
                             </select>
                         </div>
                     </div>
@@ -302,14 +324,16 @@
 
                 <div id="tasksGrid" class="task-grid-stream"></div>
                 <div id="tasksCalendar" class="tasks-calendar-view" style="display: none;"></div>
+                
+                <!-- FRIENDLY EMPTY STATE -->
                 <div id="tasksEmptyState" class="empty-state-card" style="display: none;">
-                    <div class="empty-graphic"><i data-lucide="inbox"></i></div>
-                    <h4>No Tasks Found</h4>
-                    <p>Create a new task block or adjust your current filter criteria.</p>
+                    <div class="empty-graphic"><i data-lucide="rocket"></i></div>
+                    <h4>No tasks yet — start building momentum 🚀</h4>
+                    <p>Click "Add Study Task" above to initialize your first objective.</p>
                 </div>
             </section>
 
-            <!-- 4. PROGRESS VIEW (SIGNATURE HERO POMODORO ENGINE) -->
+            <!-- 4. PROGRESS VIEW (FOCUS ENGINE & GAMIFICATION) -->
             <section id="progressView" class="view-panel">
                 <div class="view-header">
                     <div>
@@ -319,13 +343,13 @@
                 </div>
 
                 <div class="progress-grid">
-                    <!-- HERO TIMER CARD -->
+                    <!-- PREMIUM POMODORO TIMER CARD -->
                     <div class="progress-card focus-engine-card" id="focusEngineCard">
                         <div class="pomodoro-cycle-display" id="pomodoroCycleDisplay">
                             <span id="pomodoroSessionText">Session 1 of 4</span>
                         </div>
 
-                        <!-- HERO CIRCULAR TIMER -->
+                        <!-- CIRCULAR TIMER RING -->
                         <div class="circular-timer-container" id="timerContainer">
                             <div class="timer-breath-halo"></div>
                             <svg class="timer-svg" viewBox="0 0 200 200">
@@ -364,7 +388,7 @@
                         </button>
                     </div>
 
-                    <!-- PERFORMANCE STATS & BADGES -->
+                    <!-- GAMIFICATION STATS (STREAK 🔥, XP, LEVEL SYSTEM) -->
                     <div class="progress-card stats-badges-card">
                         <h3 class="card-title" style="margin-bottom: 20px;"><i data-lucide="award"></i> Level & Achievements</h3>
                         
@@ -380,14 +404,14 @@
                                 <div class="reward-stat-icon stat-icon-streak"><i data-lucide="flame"></i></div>
                                 <div class="reward-stat-details">
                                     <span class="hero-stat-number" id="rewardStreakDisplay">0 days</span>
-                                    <span class="reward-stat-label">Daily Study Streak</span>
+                                    <span class="reward-stat-label">Streak Counter 🔥</span>
                                 </div>
                             </div>
                             <div class="reward-stat-item">
                                 <div class="reward-stat-icon stat-icon-level"><i data-lucide="shield-check"></i></div>
                                 <div class="reward-stat-details">
                                     <span class="hero-stat-number" id="rewardLevelDisplay">Level 1</span>
-                                    <span class="reward-stat-label" id="rewardRankDisplay">Beginner Rank</span>
+                                    <span class="reward-stat-label" id="rewardRankDisplay">Novice Rank</span>
                                 </div>
                             </div>
                         </div>
@@ -443,7 +467,7 @@
                         <div class="settings-row">
                             <div class="setting-detail">
                                 <span class="setting-name">Theme Mode</span>
-                                <span class="setting-desc">Toggle between Deep Dark and Daylight Clarity.</span>
+                                <span class="setting-desc">Toggle between Dark Mode and Light Mode.</span>
                             </div>
                             <div class="switch-control">
                                 <label class="switch-toggle" for="themeToggleSwitch">
@@ -455,10 +479,10 @@
                     </div>
 
                     <div class="settings-card">
-                        <h3 class="settings-card-title"><i data-lucide="sparkles"></i> Gamification Mechanics</h3>
+                        <h3 class="settings-card-title"><i data-lucide="sparkles"></i> Gamification Engine</h3>
                         <div class="settings-row">
                             <div class="setting-detail">
-                                <span class="setting-name">Enable Reward Engine</span>
+                                <span class="setting-name">Enable Rewards System</span>
                                 <span class="setting-desc">Track study XP counters, streak meters, and badges.</span>
                             </div>
                             <div class="switch-control">
@@ -471,7 +495,7 @@
                     </div>
 
                     <div class="settings-card">
-                        <h3 class="settings-card-title"><i data-lucide="clock"></i> Timer Interval Configuration</h3>
+                        <h3 class="settings-card-title"><i data-lucide="clock"></i> Timer Configuration</h3>
                         <div class="settings-row-stack">
                             <div class="setting-row-input">
                                 <label for="settingFocusDuration">Focus Interval (Minutes)</label>
@@ -541,7 +565,6 @@
         </main>
     </div>
 
-    <!-- MODAL DIALOG OVERLAYS -->
     <!-- TASK FORM MODAL -->
     <div id="taskModal" class="modal-overlay">
         <div class="modal-card">
@@ -652,7 +675,7 @@
     <!-- Audio Notification -->
     <audio id="audioNotification" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-84.wav" preload="auto"></audio>
 
-    <!-- External Script Assets -->
+    <!-- Script Assets -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.394.0/dist/umd/lucide.min.js"></script>
     <script src="scripts/app.js"></script>
