@@ -73,15 +73,15 @@ function dismissLoader() {
     if (loader) {
         setTimeout(() => {
             loader.style.opacity = "0";
-            loader.style.transition = "opacity 0.5s ease";
+            loader.style.transition = "opacity 0.4s ease";
             setTimeout(() => {
                 loader.style.display = "none";
                 document.body.classList.add("loaded");
                 const container = document.querySelector(".workspace");
                 if (container) container.classList.add("revealed");
                 checkForNearDeadlines();
-            }, 500);
-        }, 1500);
+            }, 400);
+        }, 1200);
     }
 }
 if (document.readyState === "complete") {
@@ -91,8 +91,8 @@ if (document.readyState === "complete") {
 }
 
 function cacheDOMReferences() {
-    DOM.sidebar = document.querySelector(".sidebar");
-    DOM.mobileMenuToggle = document.getElementById("mobileMenuToggle");
+    DOM.sidebar = document.getElementById("mainSidebar");
+    DOM.sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
     DOM.navItems = document.querySelectorAll(".nav-item");
     DOM.viewPanels = document.querySelectorAll(".view-panel");
     DOM.sidebarTimerDisplay = document.getElementById("sidebarTimerDisplay");
@@ -174,7 +174,6 @@ function cacheDOMReferences() {
     DOM.spotlightStartBtn = document.getElementById("spotlightStartBtn");
     DOM.spotlightViewTasksBtn = document.getElementById("spotlightViewTasksBtn");
     DOM.spotlightTimerVal = document.getElementById("spotlightTimerVal");
-    DOM.shortcutHintBtn = document.getElementById("shortcutHintBtn");
 }
 
 function loadDataFromLocalStorage() {
@@ -281,15 +280,6 @@ function saveDataToLocalStorage() {
     localStorage.setItem("focusflow_study_plan", JSON.stringify(state.studyPlan));
 }
 
-function saveData() { saveDataToLocalStorage(); }
-function loadData() { loadDataFromLocalStorage(); }
-function updateData(key, value) {
-    if (state.hasOwnProperty(key)) {
-        state[key] = value;
-        saveData();
-    }
-}
-
 function syncPresetButtonsText() {
     const focusBtn = document.querySelector('.preset-btn[data-phase="Focus"]');
     if (focusBtn) {
@@ -316,7 +306,7 @@ function toggleSystemTheme(isDark) {
     state.settings.theme = isDark ? "dark" : "light";
     document.documentElement.setAttribute("data-theme", state.settings.theme);
     saveDataToLocalStorage();
-    showToast(`Atmosphere set to ${state.settings.theme === "dark" ? "Deep Immersion" : "Daylight Clarity"}.`, "info");
+    showToast(`Atmosphere set to ${state.settings.theme === "dark" ? "Deep Dark" : "Daylight Clarity"}.`, "info");
 }
 
 function setupRoutingEngine() {
@@ -363,11 +353,11 @@ function switchView(viewName) {
     // Update Page Title
     const pageTitle = document.getElementById("pageTitle");
     if (pageTitle) {
-        let displayTitle = "Now Deck";
+        let displayTitle = "Dashboard";
         if (viewName === "planner") displayTitle = "Study Planner";
-        else if (viewName === "tasks") displayTitle = "Operational Agenda";
+        else if (viewName === "tasks") displayTitle = "Tasks";
         else if (viewName === "progress") displayTitle = "Focus Engine";
-        else if (viewName === "settings") displayTitle = "Configuration Deck";
+        else if (viewName === "settings") displayTitle = "Settings";
         pageTitle.innerText = displayTitle;
     }
     
@@ -389,7 +379,7 @@ function updateGreetingDisplay() {
     }
 }
 
-function animateValue(element, start, end, duration = 800) {
+function animateValue(element, start, end, duration = 600) {
     if (!element) return;
     let startTimestamp = null;
     const step = (timestamp) => {
@@ -436,13 +426,12 @@ function renderDashboardView() {
     const overdueTasks = pendingTasks.filter(t => new Date(t.date).getTime() < now);
     const overdueCount = overdueTasks.length;
     
-    if (DOM.dashPendingCount) animateValue(DOM.dashPendingCount, 0, pendingCount, 600);
-    if (DOM.dashCompletedCount) animateValue(DOM.dashCompletedCount, 0, completedCount, 600);
+    if (DOM.dashPendingCount) animateValue(DOM.dashPendingCount, 0, pendingCount, 500);
+    if (DOM.dashCompletedCount) animateValue(DOM.dashCompletedCount, 0, completedCount, 500);
     if (DOM.dashStudyTime) DOM.dashStudyTime.innerText = `${hours}h ${mins}m`;
-    if (DOM.dashOverdueCount) animateValue(DOM.dashOverdueCount, 0, overdueCount, 600);
+    if (DOM.dashOverdueCount) animateValue(DOM.dashOverdueCount, 0, overdueCount, 500);
     
-    // SPOTLIGHT ATTENTION CARD UPDATE
-    // Priority order: Overdue tasks -> High priority tasks -> Today's due tasks -> First pending task
+    // SPOTLIGHT ATTENTION HERO CARD UPDATE
     let spotlightTask = null;
     if (overdueCount > 0) {
         spotlightTask = overdueTasks[0];
@@ -468,7 +457,7 @@ function renderDashboardView() {
     } else if (DOM.spotlightTaskTitle && DOM.spotlightTaskMeta) {
         state.activeTaskId = null;
         DOM.spotlightTaskTitle.innerText = "No pending urgent tasks";
-        DOM.spotlightTaskMeta.innerText = "Add a study task block or launch a Pomodoro session to kickstart your momentum.";
+        DOM.spotlightTaskMeta.innerText = "Add a task or launch a Pomodoro session to kickstart your study block.";
     }
     
     // Due Today list
@@ -535,8 +524,8 @@ function renderDashboardView() {
                             <span style="font-weight: 600; color: var(--text-primary);"><i data-lucide="book-open" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> ${sanitizeData(subject.name)}</span>
                             <span style="font-weight: 700; color: var(--accent);">${percent}%</span>
                         </div>
-                        <div class="progress-bar-container" style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; width: 100%;">
-                            <div class="progress-bar-fill" style="width: ${percent}%; height: 100%; background: var(--accent-gradient); transition: width 0.3s ease;"></div>
+                        <div class="progress-bar-container" style="background: var(--border); height: 6px; border-radius: 3px; overflow: hidden; width: 100%;">
+                            <div class="progress-bar-fill" style="width: ${percent}%; height: 100%; background: var(--accent); transition: width 0.3s ease;"></div>
                         </div>
                     `;
                     trackerContainer.appendChild(progressItem);
@@ -606,15 +595,19 @@ function renderTasksView() {
         } else {
             if (DOM.tasksEmptyState) DOM.tasksEmptyState.style.display = "none";
             
+            const nowTime = Date.now();
             filtered.forEach(task => {
                 const parseDate = new Date(task.date);
                 const formatStr = parseDate.toLocaleDateString(undefined, {
                     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
+                const isOverdue = !task.completed && parseDate.getTime() < nowTime;
                 
                 const node = document.createElement("div");
-                node.className = `task-node priority-${task.priority} ${task.completed ? 'completed-state' : ''}`;
+                node.className = `task-node priority-${task.priority} ${task.completed ? 'completed-state' : ''} ${isOverdue ? 'overdue-node' : ''}`;
+                if (isOverdue) node.style.borderLeft = "4px solid var(--danger)";
                 node.setAttribute("data-task-id", task.id);
+                
                 node.innerHTML = `
                     <div class="task-node-header">
                         <span class="task-node-subject">${sanitizeData(task.category)}</span>
@@ -692,7 +685,7 @@ function renderPlannerView() {
             checklistHTML += `
                 <div class="chapter-check-item" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
                     <input type="checkbox" id="chapter_${subject.id}_${i}" data-subj="${subject.id}" data-chap="${i}" class="chapter-checkbox" ${isChecked ? "checked" : ""} ${disabledStr} style="cursor: pointer; accent-color: var(--accent);">
-                    <label for="chapter_${subject.id}_${i}" class="chapter-label ${isChecked ? 'done' : ''}" style="color: ${isChecked ? 'var(--text-secondary)' : 'var(--text-primary)'}; text-decoration: ${isChecked ? 'line-through' : 'none'}; cursor: pointer;">Ch. ${i}</label>
+                    <label for="chapter_${subject.id}_${i}" class="chapter-label ${isChecked ? 'done' : ''}" style="color: ${isChecked ? 'var(--text-muted)' : 'var(--text-primary)'}; text-decoration: ${isChecked ? 'line-through' : 'none'}; cursor: pointer;">Ch. ${i}</label>
                 </div>
             `;
         }
@@ -700,13 +693,13 @@ function renderPlannerView() {
         let actionButtonHTML = "";
         if (subject.completed) {
             actionButtonHTML = `
-                <div class="subject-completed-badge" style="background: rgba(16, 185, 129, 0.12); border: 1px solid var(--success); color: var(--success); text-align: center; padding: 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
+                <div class="subject-completed-badge" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); text-align: center; padding: 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
                     All chapters completed 🎉
                 </div>
             `;
         } else if (allCompleted) {
             actionButtonHTML = `
-                <button class="btn btn-success finish-plan-btn" data-id="${subject.id}" style="width: 100%; font-weight: 600;">
+                <button class="btn btn-primary finish-plan-btn" data-id="${subject.id}" style="width: 100%; font-weight: 600;">
                     Finish Plan
                 </button>
             `;
@@ -720,7 +713,7 @@ function renderPlannerView() {
                     <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${sanitizeData(subject.name)}</h3>
                     <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);"><i data-lucide="calendar" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Target: ${subject.examDate} (${daysStr})</p>
                 </div>
-                <button class="delete-subject-btn" data-id="${subject.id}" style="background: none; border: none; color: var(--text-tertiary); cursor: pointer; padding: 4px; border-radius: 4px;" title="Delete subject plan">
+                <button class="delete-subject-btn" data-id="${subject.id}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px;" title="Delete subject plan">
                     <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
@@ -730,8 +723,8 @@ function renderPlannerView() {
                     <span style="color: var(--text-secondary);">Mastery Progress</span>
                     <span style="color: var(--accent); font-weight: 700;">${percent}%</span>
                 </div>
-                <div class="progress-bar-container" style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; width: 100%;">
-                    <div class="progress-bar-fill" style="width: ${percent}%; height: 100%; background: var(--accent-gradient); transition: width 0.3s ease;"></div>
+                <div class="progress-bar-container" style="background: var(--border); height: 6px; border-radius: 3px; overflow: hidden; width: 100%;">
+                    <div class="progress-bar-fill" style="width: ${percent}%; height: 100%; background: var(--accent); transition: width 0.3s ease;"></div>
                 </div>
             </div>
             
@@ -975,7 +968,7 @@ function toggleTaskCompletion(id, isCompleted) {
     task.completed = isCompleted;
     if (isCompleted) {
         awardPoints(5);
-        showToast("Objective completed! +5 XP earned.", "success");
+        showToast("Task completed! +5 XP earned.", "success");
     }
     saveDataToLocalStorage();
     renderAllViews();
@@ -985,8 +978,8 @@ function openAddTaskModal() {
     if (!DOM.taskModal || !DOM.editTaskId || !DOM.taskForm || !DOM.modalTitle || !DOM.formSubmitBtn) return;
     DOM.editTaskId.value = "";
     DOM.taskForm.reset();
-    DOM.modalTitle.innerHTML = '<i data-lucide="plus-circle"></i> Initialize Objective Block';
-    DOM.formSubmitBtn.innerHTML = '<i data-lucide="plus"></i> Save Objective';
+    DOM.modalTitle.innerHTML = '<i data-lucide="plus-circle"></i> Initialize Task Block';
+    DOM.formSubmitBtn.innerHTML = '<i data-lucide="plus"></i> Save Task';
     DOM.taskModal.classList.add("active");
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -1037,7 +1030,7 @@ function handleTaskFormSubmit(e) {
                 duration: durationVal,
                 notes: notesVal
             };
-            showToast("Objective updated.", "success");
+            showToast("Task updated.", "success");
         }
     } else {
         const newTask = {
@@ -1051,7 +1044,7 @@ function handleTaskFormSubmit(e) {
             completed: false
         };
         state.tasks.push(newTask);
-        showToast("Objective registered.", "success");
+        showToast("Task registered.", "success");
     }
     
     saveDataToLocalStorage();
@@ -1078,8 +1071,8 @@ function duplicateTask(id) {
 function deleteTask(id) {
     const cardNode = document.querySelector(`.task-node[data-task-id="${id}"]`);
     if (cardNode) {
-        cardNode.style.transition = "transform 0.25s, opacity 0.25s";
-        cardNode.style.transform = "scale(0.9) translateY(10px)";
+        cardNode.style.transition = "transform 0.2s, opacity 0.2s";
+        cardNode.style.transform = "scale(0.95)";
         cardNode.style.opacity = "0";
     }
     setTimeout(() => {
@@ -1087,7 +1080,7 @@ function deleteTask(id) {
         saveDataToLocalStorage();
         renderAllViews();
         showToast("Task removed.", "warning");
-    }, 250);
+    }, 200);
 }
 
 function refreshTimerDisplays() {
@@ -1101,27 +1094,14 @@ function refreshTimerDisplays() {
     if (DOM.focusTimerDisplay) DOM.focusTimerDisplay.innerText = padStr;
     if (DOM.spotlightTimerVal) DOM.spotlightTimerVal.innerText = padStr;
     
-    // Update Document Title & Beacon Status
+    // Update Document Title
     document.title = `${padStr} // FocusFlow`;
-    
-    const beaconBadge = document.getElementById("activeStateBadge");
-    if (beaconBadge) {
-        if (state.timer.isRunning) {
-            beaconBadge.innerText = `${state.timer.currentPhase} Active`;
-            beaconBadge.style.color = "var(--success)";
-            beaconBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
-        } else {
-            beaconBadge.innerText = "Ready for Action";
-            beaconBadge.style.color = "var(--accent)";
-            beaconBadge.style.borderColor = "rgba(99, 102, 241, 0.3)";
-        }
-    }
     
     if (DOM.mainTimerPhase) DOM.mainTimerPhase.innerText = state.timer.currentPhase;
     if (DOM.dashTimerPhase) DOM.dashTimerPhase.innerText = state.timer.currentPhase;
     if (DOM.focusTimerPhase) DOM.focusTimerPhase.innerText = state.timer.currentPhase;
     
-    // Update SVGs Gauges
+    // Update SVG Progress Ring Gauges smoothly
     const ratio = state.timer.totalPhaseDuration > 0 ? (state.timer.stateSeconds / state.timer.totalPhaseDuration) : 0;
     const circumferenceMain = 565.48;
     const offsetMain = circumferenceMain * (1 - ratio);
@@ -1131,7 +1111,7 @@ function refreshTimerDisplays() {
     const offsetFocus = circumferenceFocus * (1 - ratio);
     if (DOM.focusProgressCircle) DOM.focusProgressCircle.style.strokeDashoffset = offsetFocus;
     
-    // Toggle Living Breathing Halo
+    // Toggle Living Active Pulse Halo
     if (DOM.timerContainer) {
         if (state.timer.isRunning) {
             DOM.timerContainer.classList.add("is-running");
@@ -1161,6 +1141,7 @@ function resetFocusTimer() {
     state.timer.stateSeconds = state.timer.durationFocus * 60;
     state.timer.totalPhaseDuration = state.timer.stateSeconds;
     state.timer.currentPhase = "Focus";
+    if (DOM.timerContainer) DOM.timerContainer.classList.remove("completed");
     refreshTimerDisplays();
     updateTimerButtons();
     showToast("Focus session reset.", "info");
@@ -1173,6 +1154,7 @@ function applyTimerPreset(minutes, phase) {
     state.timer.stateSeconds = minutes * 60;
     state.timer.totalPhaseDuration = state.timer.stateSeconds;
     state.timer.currentPhase = phase;
+    if (DOM.timerContainer) DOM.timerContainer.classList.remove("completed");
     
     DOM.timerPresets.forEach(btn => {
         if (btn.getAttribute("data-phase") === phase) {
@@ -1195,15 +1177,15 @@ function updateTimerButtons() {
     
     if (DOM.dashStartPauseBtn) {
         DOM.dashStartPauseBtn.innerHTML = state.timer.isRunning ? pauseIconHTML : playIconHTML;
-        DOM.dashStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary" : "btn btn-success";
+        DOM.dashStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary" : "btn btn-primary";
     }
     if (DOM.mainStartPauseBtn) {
         DOM.mainStartPauseBtn.innerHTML = state.timer.isRunning ? mainPauseHTML : mainPlayHTML;
-        DOM.mainStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary btn-lg" : "btn btn-success btn-lg btn-glow";
+        DOM.mainStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg";
     }
     if (DOM.focusStartPauseBtn) {
         DOM.focusStartPauseBtn.innerHTML = state.timer.isRunning ? '<i data-lucide="pause"></i> Pause Focus' : '<i data-lucide="play"></i> Start Focus';
-        DOM.focusStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary btn-lg" : "btn btn-success btn-lg btn-glow";
+        DOM.focusStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg";
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -1213,7 +1195,6 @@ function tickFocusTimer() {
         state.timer.stateSeconds--;
         refreshTimerDisplays();
         
-        // Track stats every focus second
         if (state.timer.currentPhase === "Focus") {
             const today = new Date().toISOString().split("T")[0];
             let current = 0;
@@ -1221,7 +1202,6 @@ function tickFocusTimer() {
             if (stored) current = parseInt(stored, 10);
             localStorage.setItem(`focusflow_study_time_${today}`, current + 1);
             
-            // Check levels on increments
             if (current % 600 === 0 && current > 0) {
                 awardPoints(1);
             }
@@ -1235,9 +1215,17 @@ function handleTimerExpiry() {
     state.timer.isRunning = false;
     clearInterval(state.timer.countdownInterval);
     
-    // Play Notification Audio
+    // Audio tone
     if (DOM.audioNotification) {
         DOM.audioNotification.play().catch(() => {});
+    }
+    
+    // Add Celebratory State to Timer Ring
+    if (DOM.timerContainer) {
+        DOM.timerContainer.classList.add("completed");
+        setTimeout(() => {
+            if (DOM.timerContainer) DOM.timerContainer.classList.remove("completed");
+        }, 4000);
     }
     
     if (state.timer.currentPhase === "Focus") {
@@ -1264,6 +1252,7 @@ function handleTimerExpiry() {
     refreshTimerDisplays();
     updateTimerButtons();
     updatePomodoroDisplay();
+    confettiBurst();
     
     if (state.timer.autoStart) {
         setTimeout(toggleFocusTimerLoop, 1000);
@@ -1468,9 +1457,19 @@ function setupFormDateConstraints() {
     if (DOM.taskDate) DOM.taskDate.removeAttribute("min");
 }
 
+function toggleSidebar() {
+    if (window.innerWidth > 768) {
+        if (DOM.sidebar) DOM.sidebar.classList.toggle("collapsed");
+        const workspace = document.querySelector(".workspace");
+        if (workspace) workspace.classList.toggle("expanded");
+    } else {
+        toggleMobileSidebar();
+    }
+}
+
 function registerEventListeners() {
-    if (DOM.mobileMenuToggle) {
-        DOM.mobileMenuToggle.addEventListener("click", toggleMobileSidebar);
+    if (DOM.sidebarToggleBtn) {
+        DOM.sidebarToggleBtn.addEventListener("click", toggleSidebar);
     }
     const sidebarCloseBtn = document.getElementById("sidebarCloseBtn");
     if (sidebarCloseBtn) {
@@ -1481,7 +1480,6 @@ function registerEventListeners() {
         sidebarOverlay.addEventListener("click", closeMobileSidebar);
     }
     
-    // Web Audio Click sound feedback delegate listener
     document.addEventListener("click", (e) => {
         const target = e.target.closest("button, a, input[type='checkbox'], input[type='radio'], .metric-card, .badge-item");
         if (target) {
@@ -1608,7 +1606,6 @@ function registerEventListeners() {
     if (DOM.importDataBtn) DOM.importDataBtn.addEventListener("click", triggerImportFileInput);
     if (DOM.importFileInput) DOM.importFileInput.addEventListener("change", handleJSONDataImport);
 
-    // Metric Cards Shortcuts
     const pendingCard = document.getElementById("metricPendingCard");
     if (pendingCard) pendingCard.addEventListener("click", () => switchView("tasks"));
     
@@ -1621,14 +1618,6 @@ function registerEventListeners() {
     const timeCard = document.getElementById("metricTimeCard");
     if (timeCard) timeCard.addEventListener("click", () => switchView("progress"));
 
-    // Keyboard hint button popup
-    if (DOM.shortcutHintBtn) {
-        DOM.shortcutHintBtn.addEventListener("click", () => {
-            showToast("Shortcuts: Space (Start/Pause), N (New Task), Ctrl+/ (Theme), Ctrl+D/P/T/G/S (Nav)", "info", 5000);
-        });
-    }
-
-    // Click badge to display details
     document.querySelectorAll(".badge-item").forEach(badge => {
         badge.addEventListener("click", () => {
             const nameEl = badge.querySelector(".badge-name");
@@ -1662,7 +1651,6 @@ function setupKeyboardShortcuts() {
             openAddTaskModal();
         }
         
-        // Notion / Linear Style Shortcuts
         if (e.ctrlKey || e.metaKey) {
             if (e.key === "/") {
                 e.preventDefault();
@@ -1716,7 +1704,7 @@ function playClickSound() {
 
 function checkForNearDeadlines() {
     const now = Date.now();
-    const alertWindow = 3600000; // 1 hour
+    const alertWindow = 3600000;
     state.tasks.forEach(task => {
         if (task.completed || !task.date) return;
         const diff = new Date(task.date).getTime() - now;
@@ -1794,7 +1782,7 @@ function processToastQueue() {
             toast.remove();
             toastActive = false;
             processToastQueue();
-        }, 300);
+        }, 200);
     }, duration);
 }
 
@@ -1835,7 +1823,7 @@ function checkWelcomeOnboarding() {
     setTimeout(() => {
         welcomeModal.classList.add("active");
         if (typeof lucide !== 'undefined') lucide.createIcons();
-    }, 2000);
+    }, 1800);
     welcomeForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const nameInput = document.getElementById("welcomeNameInput");
