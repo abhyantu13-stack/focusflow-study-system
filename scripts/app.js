@@ -174,6 +174,8 @@ function cacheDOMReferences() {
     DOM.spotlightStartBtn = document.getElementById("spotlightStartBtn");
     DOM.spotlightViewTasksBtn = document.getElementById("spotlightViewTasksBtn");
     DOM.spotlightTimerVal = document.getElementById("spotlightTimerVal");
+    DOM.heroStartFocusBtn = document.getElementById("heroStartFocusBtn");
+    DOM.heroAddTaskBtn = document.getElementById("heroAddTaskBtn");
 }
 
 function loadDataFromLocalStorage() {
@@ -306,7 +308,7 @@ function toggleSystemTheme(isDark) {
     state.settings.theme = isDark ? "dark" : "light";
     document.documentElement.setAttribute("data-theme", state.settings.theme);
     saveDataToLocalStorage();
-    showToast(`Atmosphere set to ${state.settings.theme === "dark" ? "Deep Dark" : "Daylight Clarity"}.`, "info");
+    showToast(`Atmosphere set to ${state.settings.theme === "dark" ? "Dark Mode" : "Light Mode"}.`, "info");
 }
 
 function setupRoutingEngine() {
@@ -431,7 +433,7 @@ function renderDashboardView() {
     if (DOM.dashStudyTime) DOM.dashStudyTime.innerText = `${hours}h ${mins}m`;
     if (DOM.dashOverdueCount) animateValue(DOM.dashOverdueCount, 0, overdueCount, 500);
     
-    // SPOTLIGHT ATTENTION HERO CARD UPDATE
+    // SPOTLIGHT ATTENTION HERO TASK EVALUATION
     let spotlightTask = null;
     if (overdueCount > 0) {
         spotlightTask = overdueTasks[0];
@@ -457,7 +459,7 @@ function renderDashboardView() {
     } else if (DOM.spotlightTaskTitle && DOM.spotlightTaskMeta) {
         state.activeTaskId = null;
         DOM.spotlightTaskTitle.innerText = "No pending urgent tasks";
-        DOM.spotlightTaskMeta.innerText = "Add a task or launch a Pomodoro session to kickstart your study block.";
+        DOM.spotlightTaskMeta.innerText = "Add a study task block or launch a Pomodoro session to kickstart your momentum.";
     }
     
     // Due Today list
@@ -490,7 +492,7 @@ function renderDashboardView() {
                         <span class="today-task-title ${task.completed ? 'done' : ''}">${sanitizeData(task.title)}</span>
                     </div>
                     <div class="today-task-meta">
-                        <span class="today-task-badge" style="background-color: rgba(99, 102, 241, 0.12); color: var(--accent);"><i data-lucide="tag" style="width:10px;height:10px;display:inline;"></i> ${sanitizeData(task.category)}</span>
+                        <span class="today-task-badge" style="background-color: rgba(124, 58, 237, 0.12); color: var(--accent);"><i data-lucide="tag" style="width:10px;height:10px;display:inline;"></i> ${sanitizeData(task.category)}</span>
                         <span class="today-task-badge" style="background-color: rgba(255, 255, 255, 0.04); color: var(--text-secondary);"><i data-lucide="clock" style="width:10px;height:10px;display:inline;"></i> ${formattedTime}</span>
                         <button class="btn-task-focus-start" data-id="${task.id}" title="Focus on this task"><i data-lucide="play" style="width:10px;height:10px;"></i> Focus</button>
                     </div>
@@ -573,7 +575,20 @@ function renderTasksView() {
         filtered = filtered.filter(t => t.title.toLowerCase().includes(query) || t.category.toLowerCase().includes(query));
     }
     
-    if (state.filters.sortOrder === "due_asc") {
+    // SMART SORTING: Urgent Tasks First by Default
+    if (state.filters.sortOrder === "default") {
+        const nowMs = Date.now();
+        filtered.sort((a, b) => {
+            if (a.completed !== b.completed) return a.completed ? 1 : -1;
+            const aOverdue = new Date(a.date).getTime() < nowMs;
+            const bOverdue = new Date(b.date).getTime() < nowMs;
+            if (aOverdue && !bOverdue) return -1;
+            if (!aOverdue && bOverdue) return 1;
+            const pMap = { high: 3, medium: 2, low: 1 };
+            if (pMap[b.priority] !== pMap[a.priority]) return pMap[b.priority] - pMap[a.priority];
+            return new Date(a.date) - new Date(b.date);
+        });
+    } else if (state.filters.sortOrder === "due_asc") {
         filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
     } else if (state.filters.sortOrder === "due_desc") {
         filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -584,8 +599,6 @@ function renderTasksView() {
         filtered.sort((a, b) => b.duration - a.duration);
     } else if (state.filters.sortOrder === "newest") {
         filtered.sort((a, b) => b.id - a.id);
-    } else if (state.filters.sortOrder === "oldest") {
-        filtered.sort((a, b) => a.id - b.id);
     }
     
     if (DOM.tasksGrid) {
@@ -603,14 +616,26 @@ function renderTasksView() {
                 });
                 const isOverdue = !task.completed && parseDate.getTime() < nowTime;
                 
+                // SMART TAGS LOGIC: "At Risk" & "Easy Win"
+                let smartTagsHTML = "";
+                if (isOverdue || (!task.completed && task.priority === "high" && (parseDate.getTime() - nowTime < 86400000))) {
+                    smartTagsHTML += `<span class="smart-tag smart-tag-at-risk">⚠️ At Risk</span>`;
+                }
+                if (!task.completed && task.duration <= 25) {
+                    smartTagsHTML += `<span class="smart-tag smart-tag-easy-win">⚡ Easy Win</span>`;
+                }
+                
                 const node = document.createElement("div");
-                node.className = `task-node priority-${task.priority} ${task.completed ? 'completed-state' : ''} ${isOverdue ? 'overdue-node' : ''}`;
+                node.className = `task-node priority-${task.priority} ${task.completed ? 'completed-state' : ''}`;
                 if (isOverdue) node.style.borderLeft = "4px solid var(--danger)";
                 node.setAttribute("data-task-id", task.id);
                 
                 node.innerHTML = `
                     <div class="task-node-header">
-                        <span class="task-node-subject">${sanitizeData(task.category)}</span>
+                        <div>
+                            <span class="task-node-subject">${sanitizeData(task.category)}</span>
+                            ${smartTagsHTML ? `<div class="task-smart-tags">${smartTagsHTML}</div>` : ''}
+                        </div>
                         <div class="task-node-actions">
                             <button class="task-node-action-btn action-check" title="Toggle status"><i data-lucide="${task.completed ? 'check-circle-2' : 'circle'}"></i></button>
                             <button class="task-node-action-btn action-edit" title="Edit task"><i data-lucide="edit"></i></button>
@@ -693,7 +718,7 @@ function renderPlannerView() {
         let actionButtonHTML = "";
         if (subject.completed) {
             actionButtonHTML = `
-                <div class="subject-completed-badge" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); text-align: center; padding: 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
+                <div class="subject-completed-badge" style="background: rgba(34, 197, 94, 0.12); border: 1px solid var(--success); color: var(--success); text-align: center; padding: 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
                     All chapters completed 🎉
                 </div>
             `;
@@ -894,7 +919,7 @@ function renderRewardsDisplays() {
 function updateLevelSystem() {
     const xp = state.rewards.points;
     let level = 1;
-    let rank = "Beginner";
+    let rank = "Novice";
     if (xp >= 1000) {
         level = 5;
         rank = "Sage";
@@ -906,7 +931,7 @@ function updateLevelSystem() {
         rank = "Adept Learner";
     } else if (xp >= 50) {
         level = 2;
-        rank = "Novice Planner";
+        rank = "Junior Scholar";
     }
     if (DOM.rewardLevelDisplay) DOM.rewardLevelDisplay.innerText = `Level ${level}`;
     if (DOM.rewardRankDisplay) DOM.rewardRankDisplay.innerText = `${rank} Rank`;
@@ -935,22 +960,22 @@ function checkForBadgeUnlocks() {
 
     if (!state.rewards.unlockedBadges.first_task && completedTasks >= 1) {
         state.rewards.unlockedBadges.first_task = true;
-        showToast("Achievement Unlocked: First Step! Unlocked on first completed task.", "success");
+        showToast("Achievement Unlocked: First Step!", "success");
         newlyUnlocked = true;
     }
     if (!state.rewards.unlockedBadges.five_tasks && completedTasks >= 5) {
         state.rewards.unlockedBadges.five_tasks = true;
-        showToast("Achievement Unlocked: Overachiever! Complete 5 study tasks.", "success");
+        showToast("Achievement Unlocked: Overachiever!", "success");
         newlyUnlocked = true;
     }
     if (!state.rewards.unlockedBadges.timer_champ && state.rewards.pomodorosCompleted >= 1) {
         state.rewards.unlockedBadges.timer_champ = true;
-        showToast("Achievement Unlocked: Focus Master! Complete your first Pomodoro session.", "success");
+        showToast("Achievement Unlocked: Focus Master!", "success");
         newlyUnlocked = true;
     }
     if (!state.rewards.unlockedBadges.streak_3 && state.rewards.streak >= 3) {
         state.rewards.unlockedBadges.streak_3 = true;
-        showToast("Achievement Unlocked: Streak Flame! Reach a 3-day study streak.", "success");
+        showToast("Achievement Unlocked: Streak Flame 🔥!", "success");
         newlyUnlocked = true;
     }
 
@@ -968,7 +993,8 @@ function toggleTaskCompletion(id, isCompleted) {
     task.completed = isCompleted;
     if (isCompleted) {
         awardPoints(5);
-        showToast("Task completed! +5 XP earned.", "success");
+        showToast("Task completed! +5 XP earned 🎉", "success");
+        confettiBurst();
     }
     saveDataToLocalStorage();
     renderAllViews();
@@ -1101,7 +1127,10 @@ function refreshTimerDisplays() {
     if (DOM.dashTimerPhase) DOM.dashTimerPhase.innerText = state.timer.currentPhase;
     if (DOM.focusTimerPhase) DOM.focusTimerPhase.innerText = state.timer.currentPhase;
     
-    // Update SVG Progress Ring Gauges smoothly
+    const phasePill = document.getElementById("focusPanelPhasePill");
+    if (phasePill) phasePill.innerText = state.timer.currentPhase;
+    
+    // SVG Gauges Progress
     const ratio = state.timer.totalPhaseDuration > 0 ? (state.timer.stateSeconds / state.timer.totalPhaseDuration) : 0;
     const circumferenceMain = 565.48;
     const offsetMain = circumferenceMain * (1 - ratio);
@@ -1111,7 +1140,20 @@ function refreshTimerDisplays() {
     const offsetFocus = circumferenceFocus * (1 - ratio);
     if (DOM.focusProgressCircle) DOM.focusProgressCircle.style.strokeDashoffset = offsetFocus;
     
-    // Toggle Living Active Pulse Halo
+    const circumferenceHero = 439.8;
+    const offsetHero = circumferenceHero * (1 - ratio);
+    const heroRing = document.getElementById("focusPanelProgressRing");
+    if (heroRing) heroRing.style.strokeDashoffset = offsetHero;
+    
+    // BREAK PHASE COLOR TOGGLE (Focus = Purple #7C3AED, Break = Green #22C55E)
+    if (state.timer.currentPhase !== "Focus") {
+        if (DOM.timerContainer) DOM.timerContainer.classList.add("break-phase");
+        if (heroRing) heroRing.classList.add("break-phase");
+    } else {
+        if (DOM.timerContainer) DOM.timerContainer.classList.remove("break-phase");
+        if (heroRing) heroRing.classList.remove("break-phase");
+    }
+    
     if (DOM.timerContainer) {
         if (state.timer.isRunning) {
             DOM.timerContainer.classList.add("is-running");
@@ -1179,6 +1221,10 @@ function updateTimerButtons() {
         DOM.dashStartPauseBtn.innerHTML = state.timer.isRunning ? pauseIconHTML : playIconHTML;
         DOM.dashStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary" : "btn btn-primary";
     }
+    if (DOM.spotlightStartBtn) {
+        DOM.spotlightStartBtn.innerHTML = state.timer.isRunning ? '<i data-lucide="pause"></i> Pause Focus' : '<i data-lucide="play"></i> Start Focus';
+        DOM.spotlightStartBtn.className = state.timer.isRunning ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg";
+    }
     if (DOM.mainStartPauseBtn) {
         DOM.mainStartPauseBtn.innerHTML = state.timer.isRunning ? mainPauseHTML : mainPlayHTML;
         DOM.mainStartPauseBtn.className = state.timer.isRunning ? "btn btn-secondary btn-lg" : "btn btn-primary btn-lg";
@@ -1215,12 +1261,10 @@ function handleTimerExpiry() {
     state.timer.isRunning = false;
     clearInterval(state.timer.countdownInterval);
     
-    // Audio tone
     if (DOM.audioNotification) {
         DOM.audioNotification.play().catch(() => {});
     }
     
-    // Add Celebratory State to Timer Ring
     if (DOM.timerContainer) {
         DOM.timerContainer.classList.add("completed");
         setTimeout(() => {
@@ -1232,7 +1276,7 @@ function handleTimerExpiry() {
         state.timer.pomodoroCount++;
         state.rewards.pomodorosCompleted++;
         awardPoints(15);
-        showToast("Focus block complete! +15 XP rewarded.", "success");
+        showToast("Focus session complete! 🎉 +15 XP earned.", "success");
         
         if (state.timer.pomodoroCount % 4 === 0) {
             state.timer.currentPhase = "Long Break";
@@ -1244,7 +1288,7 @@ function handleTimerExpiry() {
     } else {
         state.timer.currentPhase = "Focus";
         state.timer.stateSeconds = state.timer.durationFocus * 60;
-        showToast("Break finished. Ready to focus?", "info");
+        showToast("Break finished! Ready to focus?", "info");
     }
     
     state.timer.totalPhaseDuration = state.timer.stateSeconds;
@@ -1480,6 +1524,14 @@ function registerEventListeners() {
         sidebarOverlay.addEventListener("click", closeMobileSidebar);
     }
     
+    // HERO LANDING CTA BUTTON LISTENERS
+    if (DOM.heroStartFocusBtn) {
+        DOM.heroStartFocusBtn.addEventListener("click", enterFocusMode);
+    }
+    if (DOM.heroAddTaskBtn) {
+        DOM.heroAddTaskBtn.addEventListener("click", openAddTaskModal);
+    }
+    
     document.addEventListener("click", (e) => {
         const target = e.target.closest("button, a, input[type='checkbox'], input[type='radio'], .metric-card, .badge-item");
         if (target) {
@@ -1505,7 +1557,7 @@ function registerEventListeners() {
     }
 
     if (DOM.spotlightStartBtn) {
-        DOM.spotlightStartBtn.addEventListener("click", enterFocusMode);
+        DOM.spotlightStartBtn.addEventListener("click", toggleFocusTimerLoop);
     }
     if (DOM.spotlightViewTasksBtn) {
         DOM.spotlightViewTasksBtn.addEventListener("click", () => switchView("tasks"));
